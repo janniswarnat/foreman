@@ -42,6 +42,7 @@ services:
       - FOREMAN_LOGGING_LEVEL=debug
       - FOREMAN_LOGGING_PRODUCTION_TYPE=stdout
       - FOREMAN_LOGGING_PRODUCTION_LAYOUT=pattern #json
+      # enables debugging from IDE and fixes performance issues
       - FOREMAN_PUMA_WORKERS=0
     hostname: foreman.example.com
     links:
