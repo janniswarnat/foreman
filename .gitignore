@@ -55,3 +55,7 @@ npm-debug.log
 .solargraph.yml
 .nvmrc
 mkmf.log
+build_master/smart-proxy
+build_master/smart_proxy_dynflow
+build_master/smart_proxy_salt
+srv/pillar/default.sls

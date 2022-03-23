@@ -8,7 +8,7 @@ ENV FOREMAN_DOMAIN=example.com
 RUN \
   echo -e "[nodejs]\nname=nodejs\nstream=${NODEJS_VERSION}\nprofiles=\nstate=enabled\n" > /etc/dnf/modules.d/nodejs.module && \
   echo -e "[ruby]\nname=ruby\nstream=${RUBY_VERSION}\nprofiles=\nstate=enabled\n" > /etc/dnf/modules.d/ruby.module && \
-  microdnf install -y postgresql-libs ruby{,gems} rubygem-{rake,bundler} npm nc hostname \
+  microdnf install -y postgresql-libs ruby{,gems} rubygem-{rake,bundler} npm nc hostname ruby-devel zlib-devel \
   # needed for VNC/SPICE websockets
   python2-numpy && \
   microdnf clean all

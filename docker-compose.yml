@@ -9,19 +9,24 @@ services:
     hostname: db.example.com
     image: postgres:10
     ports:
-      - 5432
+      - 5432:5432
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 5432 || exit 1"]
       interval: 30s
       timeout: 30s
       retries: 3
+    command: ["postgres", "-c", "log_statement=all","-c","log_duration=on"]
     volumes:
       - db:/var/lib/postgresql/data
 
   app: &app_base
-    image: quay.io/foreman/foreman:develop
-    command: bundle exec bin/rails server -b 0.0.0.0
+    #image: quay.io/foreman/foreman:develop
+    image: janniswarnat/foreman:3.2-stable
+    command: bundle exec rdebug-ide --host 0.0.0.0 --port 1235 --dispatcher-port 26162 -- bin/rails server -b 0.0.0.0
+    #command: ["bundle", "exec", "rdebug-ide","--host","0.0.0.0","--port","1235","--dispatcher-port","26162","-- bin/rails server","-b","0.0.0.0"]
+    #command: bundle exec bin/rails server -b 0.0.0.0
+    #command: bash
     build:
       context: .
     environment:
@@ -34,6 +39,9 @@ services:
       - FOREMAN_RAILS_CACHE_STORE_URLS=redis://redis:6379/0
       - DYNFLOW_REDIS_URL=redis://redis-tasks:6379/0
       - REDIS_PROVIDER=DYNFLOW_REDIS_URL
+      - FOREMAN_LOGGING_LEVEL=debug
+      - FOREMAN_LOGGING_PRODUCTION_TYPE=stdout
+      - FOREMAN_LOGGING_PRODUCTION_LAYOUT=pattern #json
     hostname: foreman.example.com
     links:
       - db
@@ -42,6 +50,7 @@ services:
     ports:
       - "${MY_DOCKER_IP:-127.0.0.1}:3000:3000"
       - "${MY_DOCKER_IP:-127.0.0.1}:5910-5930:5910-5930"
+      - "${MY_DOCKER_IP:-127.0.0.1}:1235:1235"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 3000 || exit 1"]
@@ -67,6 +76,80 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-persistent:/data
+
+  salt:
+    #image: "saltstack/salt"
+    image: "janniswarnat/salt:latest"
+    build: ./build_master
+    ports:
+      - "4505-4506:4505-4506"
+      - "8000:8000"
+      - "9000:9000"
+      - "1234:1234"
+    entrypoint: ["/usr/bin/supervisord"]
+    volumes:
+      - ./etc_master/salt/pki/master/master.pem:/etc/salt/pki/master/master.pem
+      - ./etc_master/salt/pki/master/master.pub:/etc/salt/pki/master/master.pub
+      - ./etc_master/salt/pki/master/master.pem:/var/lib/salt/pki/master/master.pem
+      - ./etc_master/salt/pki/master/master.pub:/var/lib/salt/pki/master/master.pub
+      - ./etc_master/salt/pki/master/minions/docker-salt-minion:/etc/salt/pki/master/minions/docker-salt-minion
+      - ./srv/salt:/srv/salt
+      - ./srv/pillar:/srv/pillar
+      - ./etc_master/foreman-proxy/settings.yml:/github.com/smart-proxy/config/settings.yml
+      - ./etc_master/foreman-proxy/settings.d/salt.yml:/github.com/smart-proxy/config/settings.d/salt.yml
+      - ./etc_master/foreman-proxy/settings.d/dynflow.yml:/github.com/smart-proxy/config/settings.d/dynflow.yml
+      - ./etc_master/salt/master.d/foreman.conf:/etc/salt/master.d/foreman.conf
+      - ./etc_master/salt/foreman.yaml:/etc/salt/foreman.yaml
+      - ./etc_master/supervisor/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./prefix-log:/usr/local/bin/prefix-log
+    environment:
+      - SALT_SHARED_SECRET=GCUrcjS8J5wrcdtbWpjV
+      - 'SALT_MASTER_CONFIG={
+                              "log_level": "warn",
+                              "file_roots": {
+                                "base": [
+                                  "/srv/salt/"
+                                ]
+                              },
+                              "pillar_roots": {
+                                "base": [
+                                  "/srv/pillar/"
+                                ]
+                              }
+                            }
+                            '
+      - 'SALT_API_CONFIG={
+                            "rest_cherrypy":{
+                               "port":8000,
+                               "disable_ssl":true
+                            },
+                            "external_auth":{
+                               "sharedsecret":{
+                                  "salt":[
+                                     ".*",
+                                     "@wheel",
+                                     "@jobs",
+                                     "@runner"
+                                  ]
+                               }
+                            },
+                            "sharedsecret":"GCUrcjS8J5wrcdtbWpjV"
+                         }
+                         '
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  salt-minion:
+    image: "janniswarnat/salt-minion:latest"
+    build: ./build_minion
+    volumes:
+      - ./etc_minion/salt/minion:/etc/salt/minion
+      - ./etc_minion/salt/pki/minion/minion.pem:/var/lib/salt/pki/minion/minion.pem
+      - ./etc_minion/salt/pki/minion/minion.pub:/var/lib/salt/pki/minion/minion.pub
+    entrypoint: ["salt-minion", "--log-level", "debug"]
 
 volumes:
   db:
