@@ -42,6 +42,7 @@ services:
       - FOREMAN_LOGGING_LEVEL=debug
       - FOREMAN_LOGGING_PRODUCTION_TYPE=stdout
       - FOREMAN_LOGGING_PRODUCTION_LAYOUT=pattern #json
+      - FOREMAN_PUMA_WORKERS=0
     hostname: foreman.example.com
     links:
       - db
@@ -80,7 +81,7 @@ services:
   salt:
     #image: "saltstack/salt"
     image: "janniswarnat/salt:latest"
-    build: ./build_master
+    #build: ./build_master
     ports:
       - "4505-4506:4505-4506"
       - "8000:8000"
@@ -144,7 +145,7 @@ services:
 
   salt-minion:
     image: "janniswarnat/salt-minion:latest"
-    build: ./build_minion
+    #build: ./build_minion
     volumes:
       - ./etc_minion/salt/minion:/etc/salt/minion
       - ./etc_minion/salt/pki/minion/minion.pem:/var/lib/salt/pki/minion/minion.pem

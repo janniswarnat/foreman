@@ -2,8 +2,9 @@
 :settings_directory: "/github.com/smart-proxy/config/settings.d"
 :trusted_hosts:
   - localhost
-  - foreman-app-1.salt-with-foreman
-  - foreman_app_1.salt-with-foreman
+  - foreman-app-1
+  - foreman_app_1
+  - app
 :daemon: false
 :bind_host:
 - 0.0.0.0
