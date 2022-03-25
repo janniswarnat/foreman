@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rake-db-seed
+spec:
+  template:
+    spec:
+      containers:
+        - name: rake-db-seed
+          image: janniswarnat/foreman:3.2-stable
+          command: ["bundle","exec","rake","db:seed","permissions:reset","password=changeme"]
+          env:
+          - name: DATABASE_URL
+            value: "postgres://foreman:foreman@db/foreman?pool=5"
+          - name: RAILS_MAX_THREADS
+            value: "5"
+          - name: RAILS_ENV
+            value: "production"
+          - name: FOREMAN_FQDN
+            value: "foreman.example.com"
+          - name: FOREMAN_DOMAIN
+            value: "example.com"
+          - name: FOREMAN_RAILS_CACHE_STORE_TYPE
+            value: "redis"
+          - name: FOREMAN_RAILS_CACHE_STORE_URLS
+            value: "redis://redis:6379/0"
+          - name: DYNFLOW_REDIS_URL
+            value: "redis://redis-tasks:6379/0"
+          - name: REDIS_PROVIDER
+            value: DYNFLOW_REDIS_URL
+          - name: FOREMAN_LOGGING_LEVEL
+            value: "debug"
+          - name: FOREMAN_LOGGING_PRODUCTION_TYPE
+            value: "stdout"
+          - name: FOREMAN_LOGGING_PRODUCTION_LAYOUT
+            value: "pattern"
+          - name: FOREMAN_PUMA_WORKERS
+            value: "0"
+      restartPolicy: Never
+  backoffLimit: 1

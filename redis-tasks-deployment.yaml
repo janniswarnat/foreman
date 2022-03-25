@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: redis-tasks
+  name: redis-tasks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis-tasks
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: redis-tasks
+    spec:
+      containers:
+        - args:
+            - redis-server
+            - --appendonly
+            - "yes"
+          image: redis
+          name: redis-tasks
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: redis-persistent
+      restartPolicy: Always
+      volumes:
+        - name: redis-persistent
+          persistentVolumeClaim:
+            claimName: redis-persistent
+status: {}

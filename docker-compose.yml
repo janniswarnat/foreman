@@ -9,7 +9,7 @@ services:
 #    hostname: db.example.com
     image: postgres:10
     ports:
-      - 5432:5432
+      - "5432:5432"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 5432 || exit 1"]
@@ -19,6 +19,9 @@ services:
     command: ["postgres", "-c", "log_statement=all","-c","log_duration=on"]
     volumes:
       - db:/var/lib/postgresql/data
+    labels:
+      kompose.service.type: loadbalancer
+      kompose.service.expose: "true"
 
   app: &app_base
     #image: quay.io/foreman/foreman:develop
@@ -48,9 +51,12 @@ services:
       - redis-cache
       - redis-tasks
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:3000:3000"
-      - "${MY_DOCKER_IP:-127.0.0.1}:5910-5930:5910-5930"
-      - "${MY_DOCKER_IP:-127.0.0.1}:1235:1235"
+      - "3000:3000"
+      - "5910-5930:5910-5930"
+      - "1235:1235"
+    labels:
+      kompose.service.type: loadbalancer
+      kompose.service.expose: "true"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 3000 || exit 1"]
@@ -70,12 +76,22 @@ services:
 
   redis-cache:
     image: redis
+    ports:
+      - "6379:6379"
+    labels:
+      kompose.service.type: loadbalancer
+      kompose.service.expose: "true"
 
   redis-tasks:
     image: redis
     command: redis-server --appendonly yes
     volumes:
       - redis-persistent:/data
+    ports:
+      - "6379:6379"
+    labels:
+      kompose.service.type: loadbalancer
+      kompose.service.expose: "true"
 
   salt:
     image: "janniswarnat/salt:latest"

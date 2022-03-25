@@ -1,9 +1,11 @@
 ---
 :settings_directory: "/github.com/smart-proxy/config/settings.d"
-:trusted_hosts:
-  - localhost
-  - foreman-app-1.foreman_default
-  - foreman_app_1.foreman_default
+#:trusted_hosts:
+#  - localhost
+#  - foreman-app-1.foreman_default
+#  - foreman_app_1.foreman_default
+#  - app
+#  - app-tcp
 :daemon: false
 :bind_host:
 - 0.0.0.0

@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.service.expose: "true"
+    kompose.service.type: loadbalancer
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: app
+  name: app
+spec:
+  ports:
+    - name: "3000"
+      port: 3000
+      targetPort: 3000
+      nodePort: 32000
+    - name: "5910"
+      port: 5910
+      targetPort: 5910
+    - name: "5911"
+      port: 5911
+      targetPort: 5911
+    - name: "5912"
+      port: 5912
+      targetPort: 5912
+    - name: "5913"
+      port: 5913
+      targetPort: 5913
+    - name: "5914"
+      port: 5914
+      targetPort: 5914
+    - name: "5915"
+      port: 5915
+      targetPort: 5915
+    - name: "5916"
+      port: 5916
+      targetPort: 5916
+    - name: "5917"
+      port: 5917
+      targetPort: 5917
+    - name: "5918"
+      port: 5918
+      targetPort: 5918
+    - name: "5919"
+      port: 5919
+      targetPort: 5919
+    - name: "5920"
+      port: 5920
+      targetPort: 5920
+    - name: "5921"
+      port: 5921
+      targetPort: 5921
+    - name: "5922"
+      port: 5922
+      targetPort: 5922
+    - name: "5923"
+      port: 5923
+      targetPort: 5923
+    - name: "5924"
+      port: 5924
+      targetPort: 5924
+    - name: "5925"
+      port: 5925
+      targetPort: 5925
+    - name: "5926"
+      port: 5926
+      targetPort: 5926
+    - name: "5927"
+      port: 5927
+      targetPort: 5927
+    - name: "5928"
+      port: 5928
+      targetPort: 5928
+    - name: "5929"
+      port: 5929
+      targetPort: 5929
+    - name: "5930"
+      port: 5930
+      targetPort: 5930
+    - name: "1235"
+      port: 1235
+      targetPort: 1235
+  selector:
+    io.kompose.service: app
+  type: LoadBalancer
+status:
+  loadBalancer: {}
