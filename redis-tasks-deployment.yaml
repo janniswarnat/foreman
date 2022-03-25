@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   annotations:
     kompose.cmd: kompose convert
+    kompose.service.expose: "true"
+    kompose.service.type: loadbalancer
     kompose.version: 1.26.1 (a9d05d509)
   creationTimestamp: null
   labels:
@@ -19,6 +21,8 @@ spec:
     metadata:
       annotations:
         kompose.cmd: kompose convert
+        kompose.service.expose: "true"
+        kompose.service.type: loadbalancer
         kompose.version: 1.26.1 (a9d05d509)
       creationTimestamp: null
       labels:
@@ -31,6 +35,8 @@ spec:
             - "yes"
           image: redis
           name: redis-tasks
+          ports:
+            - containerPort: 6379
           resources: {}
           volumeMounts:
             - mountPath: /data
