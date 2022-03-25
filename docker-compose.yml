@@ -6,7 +6,7 @@ services:
       - POSTGRES_PASSWORD=foreman
       - POSTGRES_DATABASE=foreman
       - PGDATA=/var/lib/postgresql/data/pgdata
-    hostname: db.example.com
+#    hostname: db.example.com
     image: postgres:10
     ports:
       - 5432:5432
@@ -23,10 +23,8 @@ services:
   app: &app_base
     #image: quay.io/foreman/foreman:develop
     image: janniswarnat/foreman:3.2-stable
-    command: bundle exec rdebug-ide --host 0.0.0.0 --port 1235 --dispatcher-port 26162 -- bin/rails server -b 0.0.0.0
-    #command: ["bundle", "exec", "rdebug-ide","--host","0.0.0.0","--port","1235","--dispatcher-port","26162","-- bin/rails server","-b","0.0.0.0"]
-    #command: bundle exec bin/rails server -b 0.0.0.0
-    #command: bash
+    #command: bundle exec rdebug-ide --host 0.0.0.0 --port 1235 --dispatcher-port 26162 -- bin/rails server -b 0.0.0.0
+    command: bundle exec bin/rails server -b 0.0.0.0
     build:
       context: .
     environment:
@@ -44,7 +42,7 @@ services:
       - FOREMAN_LOGGING_PRODUCTION_LAYOUT=pattern #json
       # enables debugging from IDE and fixes performance issues
       - FOREMAN_PUMA_WORKERS=0
-    hostname: foreman.example.com
+    hostname: foreman #.example.com
     links:
       - db
       - redis-cache
@@ -62,7 +60,7 @@ services:
   orchestrator:
     <<: *app_base
     command: bundle exec sidekiq -r ./extras/dynflow-sidekiq.rb -c 1 -q dynflow_orchestrator
-    hostname: orchestrator.example.com
+    #hostname: orchestrator.example.com
     ports: []
 
   worker:
@@ -80,34 +78,39 @@ services:
       - redis-persistent:/data
 
   salt:
-    #image: "saltstack/salt"
     image: "janniswarnat/salt:latest"
-    #build: ./build_master
+    build: ./build_master
     ports:
       - "4505-4506:4505-4506"
       - "8000:8000"
       - "9000:9000"
       - "1234:1234"
-    entrypoint: ["/usr/bin/supervisord"]
-    volumes:
-      - ./etc_master/salt/pki/master/master.pem:/etc/salt/pki/master/master.pem
-      - ./etc_master/salt/pki/master/master.pub:/etc/salt/pki/master/master.pub
-      - ./etc_master/salt/pki/master/master.pem:/var/lib/salt/pki/master/master.pem
-      - ./etc_master/salt/pki/master/master.pub:/var/lib/salt/pki/master/master.pub
-      - ./etc_master/salt/pki/master/minions/docker-salt-minion:/etc/salt/pki/master/minions/docker-salt-minion
-      - ./srv/salt:/srv/salt
-      - ./srv/pillar:/srv/pillar
-      - ./etc_master/foreman-proxy/settings.yml:/github.com/smart-proxy/config/settings.yml
-      - ./etc_master/foreman-proxy/settings.d/salt.yml:/github.com/smart-proxy/config/settings.d/salt.yml
-      - ./etc_master/foreman-proxy/settings.d/dynflow.yml:/github.com/smart-proxy/config/settings.d/dynflow.yml
-      - ./etc_master/salt/master.d/foreman.conf:/etc/salt/master.d/foreman.conf
-      - ./etc_master/salt/foreman.yaml:/etc/salt/foreman.yaml
-      - ./etc_master/supervisor/supervisord.conf:/etc/supervisor/supervisord.conf
-      - ./prefix-log:/usr/local/bin/prefix-log
+    entrypoint: ["/bin/sh", "-c" , "mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && /usr/bin/supervisord"]
+
+
+    configs:
+      - source: master-pem
+        target: "/etc/salt/pki/master/master.pem"
+      - source: master-pub
+        target: "/etc/salt/pki/master/master.pub"
+      - source: minion-pub
+        target: "/tmp/docker-salt-minion"
+      - source: settings-yml
+        target: "/github.com/smart-proxy/config/settings.yml"
+      - source: salt-yml
+        target: "/github.com/smart-proxy/config/settings.d/salt.yml"
+      - source: dynflow-yml
+        target: "/github.com/smart-proxy/config/settings.d/dynflow.yml"
+      - source: foreman-salt-master-yml
+        target: "/etc/salt/master.d/foreman-salt-master.yml"
+      - source: foreman-yaml
+        target: "/etc/salt/foreman.yaml"
+      - source: supervisor-conf
+        target: "/etc/supervisor/supervisord.conf"
     environment:
       - SALT_SHARED_SECRET=GCUrcjS8J5wrcdtbWpjV
       - 'SALT_MASTER_CONFIG={
-                              "log_level": "warn",
+                              "log_level": "info",
                               "file_roots": {
                                 "base": [
                                   "/srv/salt/"
@@ -143,16 +146,46 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+    labels:
+      kompose.service.type: loadbalancer
+      kompose.service.expose: "true"
 
   salt-minion:
     image: "janniswarnat/salt-minion:latest"
-    #build: ./build_minion
-    volumes:
-      - ./etc_minion/salt/minion:/etc/salt/minion
-      - ./etc_minion/salt/pki/minion/minion.pem:/var/lib/salt/pki/minion/minion.pem
-      - ./etc_minion/salt/pki/minion/minion.pub:/var/lib/salt/pki/minion/minion.pub
-    entrypoint: ["salt-minion", "--log-level", "debug"]
+    build: ./build_minion
+    entrypoint: ["salt-minion", "--log-level", "info"]
+    configs:
+      - source: minion-pem
+        target: "/var/lib/salt/pki/minion/minion.pem"
+      - source: minion-pub
+        target: "/var/lib/salt/pki/minion/minion.pub"
+      - source: minion
+        target: /etc/salt/minion
 
 volumes:
   db:
   redis-persistent:
+
+configs:
+  minion-pem:
+    file: "c"
+  minion-pub:
+    file: "./etc_minion/salt/pki/minion/minion.pub"
+  master-pem:
+    file: "./etc_master/salt/pki/master/master.pem"
+  master-pub:
+    file: "./etc_master/salt/pki/master/master.pub"
+  minion:
+    file: "./etc_minion/salt/minion"
+  settings-yml:
+    file: "./etc_master/foreman-proxy/settings.yml"
+  salt-yml:
+    file: "./etc_master/foreman-proxy/settings.d/salt.yml"
+  dynflow-yml:
+    file: "./etc_master/foreman-proxy/settings.d/dynflow.yml"
+  foreman-salt-master-yml:
+    file: "./etc_master/salt/master.d/foreman-salt-master.yml"
+  foreman-yaml:
+    file: "./etc_master/salt/foreman.yaml"
+  supervisor-conf:
+    file: "./etc_master/supervisor/supervisord.conf"
