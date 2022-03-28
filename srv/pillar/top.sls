@@ -1,7 +1,7 @@
 base:
   '*':
     - default
-  '*raspberry*':
+  '*raspberrypi*':
     - raspberrypi
   '*linksmart*':
     - raspberrypi
