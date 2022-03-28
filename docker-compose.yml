@@ -102,29 +102,6 @@ services:
       - "9000:9000"
       - "1234:1234"
     entrypoint: ["/bin/sh", "-c" , "mkdir -p /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && /usr/bin/supervisord"]
-    #entrypoint: ["mkdir -p /etc/salt/pki/master/minions"] # && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions"] #  && /usr/bin/supervisord"]
-    #    entrypoint: /usr/bin/dumb-init /usr/local/bin/saltinit
-    #    volumes:
-    #      - ./etc_master/salt/pki/master/master.pem:/etc/salt/pki/master/master.pem
-    #      - ./etc_master/salt/pki/master/master.pub:/etc/salt/pki/master/master.pub
-    #      - ./etc_master/salt/pki/master/master.pem:/var/lib/salt/pki/master/master.pem
-    #      - ./etc_master/salt/pki/master/master.pub:/var/lib/salt/pki/master/master.pub
-    #      - ./etc_master/salt/pki/master/minions/docker-salt-minion:/etc/salt/pki/master/minions/docker-salt-minion
-    #     -  ./etc_minion/salt/pki/minion/minion.pub:/etc/salt/pki/master/minions/docker-salt-minion
-    #      - ./srv/salt:/srv/salt
-    #      - ./srv/pillar:/srv/pillar
-    #      - ./etc_master/foreman-proxy/settings.yml:/github.com/smart-proxy/config/settings.yml
-    #      - ./etc_master/foreman-proxy/settings.d/salt.yml:/github.com/smart-proxy/config/settings.d/salt.yml
-    #      - ./etc_master/foreman-proxy/settings.d/dynflow.yml:/github.com/smart-proxy/config/settings.d/dynflow.yml
-    #      - ./etc_master/salt/master.d/foreman.conf:/etc/salt/master.d/foreman.conf
-    #      - ./etc_master/salt/foreman.yaml:/etc/salt/foreman.yaml
-    #      - ./etc_master/supervisor/supervisord.conf:/etc/supervisor/supervisord.conf
-    #      - ./prefix-log:/usr/local/bin/prefix-log
-    #    secrets:
-    #      - source: master-pem
-    #        target: "/etc/salt/pki/master/master.pem"
-    #      - source: master-pub
-    #        target: "/etc/salt/pki/master/master.pub"
     configs:
       - source: master-pem
         target: "/etc/salt/pki/master/master.pem"
@@ -132,7 +109,6 @@ services:
         target: "/etc/salt/pki/master/master.pub"
       - source: minion-pub
         target: "/tmp/docker-salt-minion"
-        #target: "/etc/salt/pki/master/minions/docker-salt-minion"
       - source: settings-yml
         target: "/github.com/smart-proxy/config/settings.yml"
       - source: salt-yml
@@ -200,11 +176,6 @@ services:
     image: "janniswarnat/salt-minion:latest"
     build: ./build_minion
     entrypoint: ["salt-minion", "--log-level", "info"]
-    #    secrets:
-    #      - source: minion-pem
-    #        target: "/var/lib/salt/pki/minion/minion.pem"
-    #      - source: minion-pub
-    #        target: "/var/lib/salt/pki/minion/minion.pub"
     configs:
       - source: minion-pem
         target: "/var/lib/salt/pki/minion/minion.pem"
