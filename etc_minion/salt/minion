@@ -13,8 +13,7 @@
 
 # Set the location of the salt master server. If the master server cannot be
 # resolved, then the minion will fail to start.
-master: salt
-#master: host.docker.internal
+#master: salt
 
 # Set http proxy information for the minion when doing requests
 #proxy_host:
@@ -510,7 +509,7 @@ id: docker-salt-minion
 # templating on the SLS file, and then load the result as YAML. This syntax is
 # documented in further depth at the following URL:
 #
-# https://docs.saltstack.com/en/latest/ref/renderers/#composing-renderers
+# https://docs.saltproject.io/en/latest/ref/renderers/#composing-renderers
 #
 # NOTE: The "shebang" prefix (e.g. "#!jinja|yaml") described in the
 # documentation linked above is for use in an SLS file to override the default
@@ -733,7 +732,7 @@ master_finger: 'f3:c6:4a:d4:d3:f2:36:42:eb:e2:b4:5c:a6:77:7d:ea:70:b8:60:b9:22:e
 
 ######        Reactor Settings        #####
 ###########################################
-# Define a salt reactor. See https://docs.saltstack.com/en/latest/topics/reactor/
+# Define a salt reactor. See https://docs.saltproject.io/en/latest/topics/reactor/
 #reactor: []
 
 #Set the TTL for the cache of the reactor configuration.

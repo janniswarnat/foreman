@@ -31,7 +31,7 @@ spec:
         - command:
             - /bin/sh
             - -c
-            - mkdir -p /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmartblack /etc/salt/pki/master/minions && /usr/bin/supervisord
+            - mkdir -p /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord
           env:
             - name: SALT_API_CONFIG
               value: '{ "rest_cherrypy":{ "port":8000, "disable_ssl":true }, "external_auth":{ "sharedsecret":{ "salt":[ ".*", "@wheel", "@jobs", "@runner" ] } }, "sharedsecret":"GCUrcjS8J5wrcdtbWpjV" } '
@@ -61,9 +61,9 @@ spec:
             - mountPath: /tmp/raspberrypi
               name: raspberrypi-pub
               subPath: raspberrypi
-            - mountPath: /tmp/linksmartblack
-              name: linksmartblack-pub
-              subPath: linksmartblack
+            - mountPath: /tmp/linksmart-black.iot
+              name: linksmart-black-iot-pub
+              subPath: linksmart-black.iot
             - mountPath: /github.com/smart-proxy/config/settings.yml
               name: settings-yml
               subPath: settings.yml
@@ -122,10 +122,10 @@ spec:
           name: raspberrypi-pub
         - configMap:
             items:
-              - key: linksmartblack
-                path: linksmartblack
-            name: linksmartblack-pub
-          name: linksmartblack-pub
+              - key: linksmart-black.iot
+                path: linksmart-black.iot
+            name: linksmart-black-iot-pub
+          name: linksmart-black-iot-pub
         - configMap:
             items:
               - key: settings.yml

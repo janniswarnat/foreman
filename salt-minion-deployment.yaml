@@ -32,10 +32,10 @@ spec:
           name: salt-minion
           resources: {}
           volumeMounts:
-            - mountPath: /var/lib/salt/pki/minion/minion.pem
+            - mountPath: /etc/salt/pki/minion/minion.pem
               name: minion-pem
               subPath: minion.pem
-            - mountPath: /var/lib/salt/pki/minion/minion.pub
+            - mountPath: /etc/salt/pki/minion/minion.pub
               name: minion-pub
               subPath: minion.pub
             - mountPath: /etc/salt/minion
