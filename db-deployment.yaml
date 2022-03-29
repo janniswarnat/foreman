@@ -35,6 +35,8 @@ spec:
             - log_statement=all
             - -c
             - log_duration=on
+            - -c
+            - log_min_messages=INFO
           env:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -44,7 +46,7 @@ spec:
               value: foreman
             - name: POSTGRES_USER
               value: foreman
-          image: postgres:10
+          image: postgres:14
           livenessProbe:
             exec:
               command:
