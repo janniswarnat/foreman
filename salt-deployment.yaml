@@ -94,6 +94,9 @@ spec:
             - mountPath: /srv/pillar/raspberrypi.sls
               name: pillar-raspberrypi
               subPath: raspberrypi.sls
+            - mountPath: /srv/pillar/linksmart.sls
+              name: pillar-linksmart
+              subPath: linksmart.sls
       restartPolicy: Always
       volumes:
         - configMap:
@@ -186,4 +189,10 @@ spec:
                 path: raspberrypi.sls
             name: pillar-raspberrypi
           name: pillar-raspberrypi
+        - configMap:
+            items:
+              - key: linksmart.sls
+                path: linksmart.sls
+            name: pillar-linksmart
+          name: pillar-linksmart
 status: {}

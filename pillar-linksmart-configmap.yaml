@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  linksmart.sls: |
+    user: pi
+    group: pi
+    mqtt-password: dummy
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: salt
+  name: pillar-linksmart

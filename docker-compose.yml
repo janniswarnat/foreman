@@ -133,6 +133,8 @@ services:
         target: "/srv/pillar/default.sls"
       - source: pillar-raspberrypi
         target: "/srv/pillar/raspberrypi.sls"
+      - source: pillar-linksmart
+        target: "/srv/pillar/linksmart.sls"
     environment:
       - SALT_SHARED_SECRET=GCUrcjS8J5wrcdtbWpjV
       - 'SALT_MASTER_CONFIG={
@@ -227,3 +229,5 @@ configs:
     file: "./srv/pillar/default.sls"
   pillar-raspberrypi:
     file: "./srv/pillar/raspberrypi.sls"
+  pillar-linksmart:
+    file: "./srv/pillar/linksmart.sls"

@@ -4,4 +4,4 @@ base:
   '*raspberrypi*':
     - raspberrypi
   '*linksmart*':
-    - raspberrypi
+    - linksmart
