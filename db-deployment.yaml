@@ -32,10 +32,6 @@ spec:
         - args:
             - postgres
             - -c
-            - log_statement=all
-            - -c
-            - log_duration=on
-            - -c
             - log_min_messages=INFO
           env:
             - name: PGDATA
@@ -47,10 +43,29 @@ spec:
             - name: POSTGRES_USER
               value: foreman
           image: postgres:14
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/psql
+                - -U
+                - foreman
+                - -d
+                - foreman
+                - -c
+                - SELECT 1
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 30
           livenessProbe:
             exec:
               command:
-                - nc -z 127.0.0.1 5432 || exit 1
+                - /usr/bin/psql
+                - -U
+                - foreman
+                - -d
+                - foreman
+                - -c
+                - SELECT 1
             failureThreshold: 3
             periodSeconds: 30
             timeoutSeconds: 30
