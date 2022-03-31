@@ -1,8 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: nginx
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
 spec:
+  ingressClassName: nginx
   rules:
     - http:
         paths:
@@ -13,7 +16,7 @@ spec:
                 name: salt
                 port:
                   number: 8000
-      host: salt.havana.fit.fraunhofer.de
+      host: salt-api.havana.fit.fraunhofer.de
     - http:
         paths:
           - path: /
@@ -24,4 +27,3 @@ spec:
                 port:
                   number: 3000
       host: foreman.havana.fit.fraunhofer.de
-
