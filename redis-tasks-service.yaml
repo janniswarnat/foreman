@@ -17,6 +17,6 @@ spec:
       targetPort: 6379
   selector:
     io.kompose.service: redis-tasks
-  type: LoadBalancer
+#  type: LoadBalancer
 status:
   loadBalancer: {}

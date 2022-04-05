@@ -27,3 +27,23 @@ spec:
                 port:
                   number: 3000
       host: foreman.havana.fit.fraunhofer.de
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rabbitmq
+                port:
+                  number: 15672
+      host: rabbitmq-management.havana.fit.fraunhofer.de
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rabbitmq
+                port:
+                  number: 15675
+      host: rabbitmq.havana.fit.fraunhofer.de
