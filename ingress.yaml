@@ -46,4 +46,4 @@ spec:
                 name: rabbitmq
                 port:
                   number: 15675
-      host: rabbitmq.havana.fit.fraunhofer.de
+      host: rabbitmq-websocket.havana.fit.fraunhofer.de
