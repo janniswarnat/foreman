@@ -31,7 +31,7 @@ spec:
         - command:
             - /bin/sh
             - -c
-            - mkdir -p /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord
+            - mkdir -p /srv/salt && chown -R salt:salt /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord
           env:
             - name: SALT_API_CONFIG
               value: '{ "rest_cherrypy":{ "port":8000, "disable_ssl":true }, "external_auth":{ "sharedsecret":{ "salt":[ ".*", "@wheel", "@jobs", "@runner" ] } }, "sharedsecret":"GCUrcjS8J5wrcdtbWpjV" } '

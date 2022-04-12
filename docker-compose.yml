@@ -102,7 +102,7 @@ services:
       - "8000:8000"
       - "9000:9000"
       - "1234:1234"
-    entrypoint: ["/bin/sh", "-c" , "mkdir -p /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord"]
+    entrypoint: ["/bin/sh", "-c" , "mkdir -p /srv/salt && chown -R salt:salt /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord"]
     configs:
       - source: master-pem
         target: "/etc/salt/pki/master/master.pem"
