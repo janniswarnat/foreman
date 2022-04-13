@@ -102,7 +102,12 @@ services:
       - "8000:8000"
       - "9000:9000"
       - "1234:1234"
-    entrypoint: ["/bin/sh", "-c" , "mkdir -p /srv/salt && chown -R salt:salt /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord"]
+    entrypoint: ["/bin/sh", "-c" , "chmod 700 /etc/salt/pki/master/ssh && chmod 600 /etc/salt/pki/master/ssh/salt-ssh.rsa && chmod 644 /etc/salt/pki/master/ssh/salt-ssh.rsa.pub && chmod 700 /root/.ssh && chmod 600 /root/.ssh/id_rsa && chmod 644 /root/.ssh/id_rsa.pub && mkdir -p /srv/salt && chown -R salt:salt /srv/salt && tar -xzvf /tmp/salt-files.tar.gz -C /srv/salt && mkdir -p /etc/salt/pki/master/minions && cp /tmp/docker-salt-minion /etc/salt/pki/master/minions && cp /tmp/raspberrypi /etc/salt/pki/master/minions && cp /tmp/linksmart-black.iot /etc/salt/pki/master/minions && /usr/bin/supervisord"]
+    volumes:
+      - "./id_rsa:/root/.ssh/id_rsa"
+      - "./id_rsa.pub:/root/.ssh/id_rsa.pub"
+      - "./salt-ssh.rsa:/etc/salt/pki/master/ssh/salt-ssh.rsa"
+      - "./salt-ssh.rsa.pub:/etc/salt/pki/master/ssh/salt-ssh.rsa.pub"
     configs:
       - source: master-pem
         target: "/etc/salt/pki/master/master.pem"
@@ -126,6 +131,8 @@ services:
         target: "/etc/salt/foreman.yaml"
       - source: supervisor-conf
         target: "/etc/supervisor/supervisord.conf"
+      - source: roster
+        target: "/etc/salt/roster"
       - source: salt-files
         target: "/tmp/salt-files.tar.gz"
       - source: pillar-top
@@ -191,6 +198,22 @@ services:
       - source: minion
         target: /etc/salt/minion
 
+  sshd:
+    image: "kubernetesio/sshd-jumpserver"
+    environment:
+      - "PUBLIC_KEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQChRCIkXAcvFgo6rGYoeHUnEv6r87hQAgKkhU+Jy/MwsduST2y8PsDVV+HiNf7rs6KoOQzX0M/Wp+uAJU9jtTbIRFlGU0NmCnqKSCzA2pgyybRUa0XSyO1S3VRjOFiZo3cavtcEgQ3Lc8zWSwG4NguXCXGlSnW/OmWi3UA5GDbV4GqV2hPVJiQQjpsVMQuRs6SAOViR+E0cyJ3nnIUo21YZfsu9HSR2K6w4FFJtRonQOb0WglOl1Z9CglNaTw6LJn2q4++yqyQp4La8SQCmnhG0RUOoZ0WnhTSsSa0TGV9grSDAiOCAUd1YaXPWzPBXdthFTfWHFN7WFGJgitf3OnkAsTko553+Nd49vNTtlXomdkVPQP21g/0CtCV/cA8sIJrxs21q68fxGVSe9Viv1nqNjz3s+VCxq1CFPdRBg/dzWC/JPG/TeA9c0UqoFCJ/98uwBiSfwvHgcA6KCeAShzjl75ZaSaq5DnLji7ZLEaJsoyexlYpHZ/x2kFYIsbQlIW0= root@442c14e68b46"
+    ports:
+      - "22:22"
+    volumes:
+      - ./sshd/etc/ssh/ssh_host_rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub
+      - ./sshd/etc/ssh/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key
+      - ./sshd/etc/ssh/ssh_host_ecdsa_key.pub:/etc/ssh/ssh_host_ecdsa_key.pub
+      - ./sshd/etc/ssh/ssh_host_ecdsa_key:/etc/ssh/ssh_host_ecdsa_key
+      - ./sshd/etc/ssh/ssh_host_ed25519_key.pub:/etc/ssh/ssh_host_ed25519_key.pub
+      - ./sshd/etc/ssh/ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./sshd_config:/etc/ssh/sshd_config
+
 volumes:
   db:
   redis-persistent:
@@ -222,6 +245,8 @@ configs:
     file: "./etc_master/salt/foreman.yaml"
   supervisor-conf:
     file: "./etc_master/supervisor/supervisord.conf"
+  roster:
+    file: "./etc_master/salt/roster"
   salt-files:
     file: "./srv/salt/salt-files.tar.gz"
   pillar-top:
@@ -232,3 +257,4 @@ configs:
     file: "./srv/pillar/raspberrypi.sls"
   pillar-linksmart:
     file: "./srv/pillar/linksmart.sls"
+
