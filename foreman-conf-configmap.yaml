@@ -10,6 +10,10 @@ data:
     autosign_file: /etc/salt/autosign.conf
 
     autosign_grains_dir: /var/lib/foreman-proxy/salt/grains
+    
+    publisher_acl:
+      foreman-proxy:
+        - state.template_str
 
     # reactor:
     #   - 'salt/auth':
