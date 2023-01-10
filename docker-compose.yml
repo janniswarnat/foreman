@@ -1,29 +1,38 @@
 version: '3.4'
 services:
   db:
+    networks:
+      - foreman
     environment:
       - POSTGRES_USER=foreman
       - POSTGRES_PASSWORD=foreman
       - POSTGRES_DATABASE=foreman
       - PGDATA=/var/lib/postgresql/data/pgdata
     hostname: db.example.com
-    image: postgres:10
+    image: postgres:14
     ports:
-      - 5432
+      - "5432:5432"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 5432 || exit 1"]
       interval: 30s
       timeout: 30s
       retries: 3
+    #command: ["postgres", "-c", "log_statement=all","-c","log_duration=on","-c","log_min_messages=INFO"]
+    command: ["postgres", "-c","log_min_messages=INFO"]
     volumes:
       - db:/var/lib/postgresql/data
 
   app: &app_base
-    image: quay.io/foreman/foreman:develop
+    #image: quay.io/foreman/foreman:latest
+    image: janniswarnat/foreman:3.5-m1
+    #command: bundle exec rdebug-ide --host 0.0.0.0 --port 1235 --dispatcher-port 26163 -- bin/rails server -b 0.0.0.0
     command: bundle exec bin/rails server -b 0.0.0.0
     build:
       context: .
+    networks:
+      - foreman
+      - salt
     environment:
       - DATABASE_URL=postgres://foreman:foreman@db/foreman?pool=5
       - RAILS_MAX_THREADS=5
@@ -31,17 +40,22 @@ services:
       - FOREMAN_FQDN=foreman.example.com
       - FOREMAN_DOMAIN=example.com
       - FOREMAN_RAILS_CACHE_STORE_TYPE=redis
-      - FOREMAN_RAILS_CACHE_STORE_URLS=redis://redis:6379/0
+      - FOREMAN_RAILS_CACHE_STORE_URLS=redis://redis-cache:6379/0
       - DYNFLOW_REDIS_URL=redis://redis-tasks:6379/0
       - REDIS_PROVIDER=DYNFLOW_REDIS_URL
+      - FOREMAN_LOGGING_LEVEL=debug
+      - FOREMAN_LOGGING_PRODUCTION_TYPE=stdout
+      - FOREMAN_LOGGING_PRODUCTION_LAYOUT=pattern #json
+      - FOREMAN_PUMA_WORKERS=1
     hostname: foreman.example.com
     links:
       - db
       - redis-cache
       - redis-tasks
     ports:
-      - "${MY_DOCKER_IP:-127.0.0.1}:3000:3000"
-      - "${MY_DOCKER_IP:-127.0.0.1}:5910-5930:5910-5930"
+      - "3000:3000"
+      - "5910-5930:5910-5930"
+      - "1235:1235"
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 3000 || exit 1"]
@@ -50,24 +64,46 @@ services:
 
   orchestrator:
     <<: *app_base
-    command: bundle exec sidekiq -r ./extras/dynflow-sidekiq.rb -c 1 -q dynflow_orchestrator
+    networks:
+      - foreman
+      - salt
+    command: bundle exec sidekiq -r ./extras/dynflow-sidekiq.rb -c 1 -q dynflow_orchestrator,1
+    #command: bundle exec rake dynflow:executor
     hostname: orchestrator.example.com
     ports: []
 
   worker:
     <<: *app_base
-    command: bundle exec sidekiq -r ./extras/dynflow-sidekiq.rb -c 15 -q default,remote_execution
+    networks:
+      - foreman
+      - salt
+    command: bundle exec sidekiq -r ./extras/dynflow-sidekiq.rb -c 15 -q default,1 -q remote_execution,1
+    #command: bundle exec rake dynflow:executor
+    hostname: worker.example.com
     ports: []
 
   redis-cache:
     image: redis
+    networks:
+      - foreman
+    ports:
+      - "6380:6379"
 
   redis-tasks:
     image: redis
+    networks:
+      - foreman
     command: redis-server --appendonly yes
     volumes:
       - redis-persistent:/data
+    ports:
+      - "6379:6379"
 
 volumes:
   db:
   redis-persistent:
+
+networks:
+  salt:
+    external: true
+  foreman:
