@@ -8,7 +8,7 @@ ENV FOREMAN_DOMAIN=example.com
 RUN \
   echo -e "[nodejs]\nname=nodejs\nstream=${NODEJS_VERSION}\nprofiles=\nstate=enabled\n" > /etc/dnf/modules.d/nodejs.module && \
   echo -e "[ruby]\nname=ruby\nstream=${RUBY_VERSION}\nprofiles=\nstate=enabled\n" > /etc/dnf/modules.d/ruby.module && \
-  microdnf install -y postgresql-libs ruby{,gems} rubygem-{rake,bundler} npm nc hostname \
+  microdnf install -y postgresql-libs ruby{,gems} rubygem-{rake,bundler} npm nc hostname ruby-devel zlib-devel sqlite-devel findutils vi \
   # needed for VNC/SPICE websockets
   python2-numpy && \
   microdnf clean all
@@ -57,7 +57,7 @@ RUN \
   mv -v db/schema.rb.nulldb db/schema.rb && \
   bundle exec rake assets:clean assets:precompile apipie:cache:index
 
-RUN npm install --no-optional && \
+RUN npm install --python=python2.7 --verbose --no-optional && \
   ./node_modules/webpack/bin/webpack.js --config config/webpack.config.js && npm run analyze && \
 # cleanups
   rm -rf public/webpack/stats.json ./node_modules vendor/ruby/*/cache vendor/ruby/*/gems/*/node_modules bundler.d/nulldb.rb db/schema.rb && \
